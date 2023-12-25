@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth"
 import authOptions from "@/lib/auth"
 import Providers from "./providers"
 
-const inter = Roboto({ weight: "100" })
+const inter = Roboto({ weight: "100", subsets: ["latin-ext"] })
 
 export const metadata: Metadata = {
   title: "ZapDivizer",
