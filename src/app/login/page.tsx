@@ -39,7 +39,7 @@ const Page: NextPage<{ searchParams: { callbackUrl: string } }> = ({ searchParam
         </div>
         <Button className="w-full font-semibold" type="submit">Entrar</Button>
       </form>
-      <span className="mt-4 text-center">Não tem uma conta? <Link href="/cadastro">Cadastre-se</Link></span>
+      <span className="mt-4 text-center font-semibold">Não tem uma conta? <Link href="/cadastro" className="text-green-700">Cadastre-se</Link></span>
     </div>
   )
 }
