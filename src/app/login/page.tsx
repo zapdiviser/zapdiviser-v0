@@ -6,6 +6,7 @@ import { z } from "zod"
 import Button from "../_components/Button"
 import { signIn } from "next-auth/react"
 import { NextPage } from "next"
+import Link from "next/link"
 
 const schema = z.object({
   email: z.string(),
@@ -38,6 +39,7 @@ const Page: NextPage<{ searchParams: { callbackUrl: string } }> = ({ searchParam
         </div>
         <Button className="w-full font-semibold" type="submit">Entrar</Button>
       </form>
+      <span className="mt-4 text-center">Não tem uma conta? <Link href="/cadastro">Cadastre-se</Link></span>
     </div>
   )
 }
