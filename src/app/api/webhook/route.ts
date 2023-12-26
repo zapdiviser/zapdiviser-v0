@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       to: [email],
       from: "Acme <onboarding@resend.dev>",
       subject: "Obrigado por adquirir o ZapDiviser!",
-      react: <CreatedEmail password={password} />
+      react: CreatedEmail({ password })
     })
   }
 
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       to: email,
       from: "vem-questoes.vadolasi.dev",
       subject: "Regularize sua conta",
-      react: <RegularizeEmail />
+      react: RegularizeEmail({})
     })
   }
 
