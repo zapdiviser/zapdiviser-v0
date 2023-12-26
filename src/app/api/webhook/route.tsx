@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     await redis.set(`user-${user?.id}:password`, await argon2.hash(password))
 
     await resend.emails.send({
-      to: email,
+      to: [email],
       from: "Acme <onboarding@resend.dev>",
       subject: "Obrigado por adquirir o ZapDiviser!",
       react: <CreatedEmail password={password} />
