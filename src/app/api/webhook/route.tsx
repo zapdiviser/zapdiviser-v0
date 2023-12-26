@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
     await resend.emails.send({
       to: email,
-      from: "vem-questoes.vadolasi.dev",
+      from: "Acme <onboarding@resend.dev>",
       subject: "Obrigado por adquirir o ZapDiviser!",
       react: <CreatedEmail password={password} />
     })
