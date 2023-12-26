@@ -32,12 +32,16 @@ export async function POST(req: Request) {
 
     await redis.set(`user-${user?.id}:password`, await argon2.hash(password))
 
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       to: [email],
-      from: "Acme <vem-questoes.vadolasi.dev>",
+      from: "ZapDiviser <zapdiviser@vem-questoes.vadolasi.dev>",
       subject: "Obrigado por adquirir o ZapDiviser!",
       react: CreatedEmail({ password })
     })
+
+    if (error) {
+      console.error(error)
+    }
   }
 
   let active: boolean
@@ -55,10 +59,10 @@ export async function POST(req: Request) {
 
   await redis.set(`user-${user?.id}:active`, active)
 
-  if (active) {
+  if (!active) {
     await resend.emails.send({
       to: email,
-      from: "Acme <vem-questoes.vadolasi.dev>",
+      from: "ZapDiviser <zapdiviser@vem-questoes.vadolasi.dev>",
       subject: "Regularize sua conta",
       react: RegularizeEmail({})
     })
