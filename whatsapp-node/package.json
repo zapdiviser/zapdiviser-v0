@@ -1,0 +1,25 @@
+{
+  "name": "whatsapp-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.2",
+    "sucrase": "^3.35.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "github:WhiskeySockets/Baileys",
+    "bullmq": "^5.1.1",
+    "ioredis": "^5.3.2",
+    "node-cache": "^5.1.2"
+  }
+}

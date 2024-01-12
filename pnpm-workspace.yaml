@@ -1,0 +1,4 @@
+packages:
+  - frontend
+  - flow-node
+  - whatsapp-node
