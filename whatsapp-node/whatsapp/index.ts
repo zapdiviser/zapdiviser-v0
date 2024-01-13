@@ -49,7 +49,12 @@ class Whatsapp {
       async (events) => {
         if (events["connection.update"]) {
           const update = events["connection.update"]
-          const { connection, lastDisconnect } = update
+          const { connection, lastDisconnect, qr } = update
+
+          if (qr) {
+            this.emmiter.emit("qr", qr)
+          }
+
           if (connection === "close") {
             if ((lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut) {
               this.startSock()
@@ -172,6 +177,10 @@ class Whatsapp {
 
   async onNewMessage(cb: (msg: proto.IWebMessageInfo) => void) {
     this.emmiter.on("new-message", cb)
+  }
+
+  async onQrCode(cb: (qr: string) => void) {
+    this.emmiter.on("qr", cb)
   }
 }
 

@@ -1,7 +1,14 @@
 "use client"
 
 import React, { useCallback } from "react"
-import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from "reactflow"
+import ReactFlow, {
+  Background,
+  Controls,
+  MiniMap,
+  addEdge,
+  useEdgesState,
+  useNodesState
+} from "reactflow"
 import "reactflow/dist/style.css"
 
 const initialNodes = [
@@ -22,21 +29,18 @@ const Editor: React.FC = () => {
 
   return (
     <>
-      {/*
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          fitView
-        >
-          <Controls />
-          <MiniMap />
-          <Background gap={12} size={1} />
-        </ReactFlow>
-      */}
-      Ocorreu um erro ao carregar o editor.
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        fitView
+      >
+        <Controls />
+        <MiniMap />
+        <Background gap={12} size={1} />
+      </ReactFlow>
     </>
   )
 }

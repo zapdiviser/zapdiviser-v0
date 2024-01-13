@@ -9,7 +9,7 @@ const redis = new Redis({
   port: parseInt(process.env.REDIS_PORT!)
 })
 
-const worker = new Worker<{ from: string, to: string }>("Messages", async job => {
+const worker = new Worker<{ from: string, to: string }>(""FlowTriggers"", async job => {
   const { from, to } = job.data
 
   const situation = await redis.get(`conversation:${from}:${to}`)

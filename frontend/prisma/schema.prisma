@@ -16,25 +16,26 @@ model User {
   password      String
   isActivated   Boolean   @default(false)
 
-  accounts      Account[]
-  sessions      Session[]
-  funils Funil[]
+  accounts  Account[]
+  sessions  Session[]
+  funils    Funil[]
   redirects Redirect[]
+  instances Instance[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -81,38 +82,31 @@ model Instance {
   createdAt DateTime @default(now())
   name      String
 
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
   funils Funil_Instance[]
 }
 
 model Funil {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  name       String
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name      String
+  flow      Json
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
   instances Funil_Instance[]
-  flows Flow[]
 }
 
 model Funil_Instance {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  funil   Funil  @relation(fields: [funilId], references: [id])
+  funil   Funil  @relation(fields: [funilId], references: [id], onDelete: Cascade)
   funilId String
 
-  instance   Instance @relation(fields: [instanceId], references: [id])
+  instance   Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
   instanceId String
-}
-
-model Flow {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  name      String
-  flow      Json
-
-  funil   Funil  @relation(fields: [funilId], references: [id])
-  funilId String
 }

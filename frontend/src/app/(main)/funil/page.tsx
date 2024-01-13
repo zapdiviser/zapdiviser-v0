@@ -26,7 +26,8 @@ const Page: NextPage = async () => {
     const { id } = await prisma.funil.create({
       data: {
         name,
-        userId: user.id!
+        userId: user.id!,
+        flow: {}
       }
     })
 

@@ -1,5 +1,17 @@
+import redis from "./redis"
 import Whatsapp from "./whatsapp"
 import { Worker, Queue } from "bullmq"
+import Pusher from "pusher"
+
+const insanceId = process.env.INSTANCE_ID!
+
+const pusher = new Pusher({
+  appId: "1740345",
+  key: "2cc10d3c15c82eab13cc",
+  secret: "04b9a85ecef7c383e0c6",
+  cluster: "sa1",
+  useTLS: true
+})
 
 interface Message {
   from: string
@@ -8,13 +20,13 @@ interface Message {
 }
 
 async function main () {
-  const queue = new Queue("Messages")
+  const queue = new Queue("FlowTriggers", { connection: redis })
 
-  const whatsapp = new Whatsapp(process.env.INSTANCE_ID!)
+  const whatsapp = new Whatsapp(insanceId)
 
   await whatsapp.startSock()
 
-  const worker = new Worker<Message>(`MessagesSender:${process.env.INSTANCE_ID}`, async job => {
+  const worker = new Worker<Message>(`MessagesSender:${insanceId}`, async job => {
     const { to, content } = job.data
 
     await whatsapp.sendMessageWTyping({ text: content }, to)
@@ -29,7 +41,13 @@ async function main () {
   })
 
   whatsapp.onNewMessage(async msg => {
-    await queue.add("Messages", { from: msg.key.remoteJid, content: msg.message?.conversation! })
+    await queue.add(`message:${insanceId}`, { from: msg.key.remoteJid, content: msg.message?.conversation! })
+  })
+
+  whatsapp.onQrCode(async qr => {
+    await pusher.trigger(`whatsapp:${insanceId}`, "qr", {
+      message: qr
+    })
   })
 }
 

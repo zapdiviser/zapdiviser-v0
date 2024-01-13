@@ -10,7 +10,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const links = [
     {
       title: "Whatsapp",
-      href: "/w"
+      href: "/whatsapp"
     },
     {
       title: "Redirect",

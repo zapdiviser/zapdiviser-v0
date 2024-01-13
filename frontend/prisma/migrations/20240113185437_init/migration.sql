@@ -71,6 +71,7 @@ CREATE TABLE "Instance" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "Instance_pkey" PRIMARY KEY ("id")
 );
@@ -80,6 +81,7 @@ CREATE TABLE "Funil" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
+    "flow" JSONB NOT NULL,
     "userId" TEXT NOT NULL,
 
     CONSTRAINT "Funil_pkey" PRIMARY KEY ("id")
@@ -93,17 +95,6 @@ CREATE TABLE "Funil_Instance" (
     "instanceId" TEXT NOT NULL,
 
     CONSTRAINT "Funil_Instance_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Flow" (
-    "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "name" TEXT NOT NULL,
-    "flow" JSONB NOT NULL,
-    "funilId" TEXT NOT NULL,
-
-    CONSTRAINT "Flow_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -131,16 +122,16 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Redirect" ADD CONSTRAINT "Redirect_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RedirectUrl" ADD CONSTRAINT "RedirectUrl_redirectId_fkey" FOREIGN KEY ("redirectId") REFERENCES "Redirect"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "RedirectUrl" ADD CONSTRAINT "RedirectUrl_redirectId_fkey" FOREIGN KEY ("redirectId") REFERENCES "Redirect"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Instance" ADD CONSTRAINT "Instance_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Funil" ADD CONSTRAINT "Funil_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Funil_Instance" ADD CONSTRAINT "Funil_Instance_funilId_fkey" FOREIGN KEY ("funilId") REFERENCES "Funil"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Funil_Instance" ADD CONSTRAINT "Funil_Instance_funilId_fkey" FOREIGN KEY ("funilId") REFERENCES "Funil"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Funil_Instance" ADD CONSTRAINT "Funil_Instance_instanceId_fkey" FOREIGN KEY ("instanceId") REFERENCES "Instance"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Flow" ADD CONSTRAINT "Flow_funilId_fkey" FOREIGN KEY ("funilId") REFERENCES "Funil"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Funil_Instance" ADD CONSTRAINT "Funil_Instance_instanceId_fkey" FOREIGN KEY ("instanceId") REFERENCES "Instance"("id") ON DELETE CASCADE ON UPDATE CASCADE;
