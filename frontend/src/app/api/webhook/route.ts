@@ -1,5 +1,3 @@
-import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter"
-import redis from "@/lib/redis"
 import argon2 from "argon2"
 import { Resend } from "resend"
 import { nanoid } from "nanoid"
@@ -8,10 +6,11 @@ import RegularizeEmail from "@/emails/resularize"
 import prisma from "@/lib/prisma"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const adapter = PrismaAdapter(prisma)
 
 export async function POST(req: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY)
+
   const data = await req.json()
 
   if (data.token !== process.env.WEBHOOK_TOKEN) {
