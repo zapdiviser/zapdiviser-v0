@@ -21,18 +21,23 @@ const Editor: React.FC = () => {
   )
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      fitView
-    >
-      <Controls />
-      <MiniMap />
-      <Background gap={12} size={1} />
-    </ReactFlow>
+    <>
+      {/*
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          fitView
+        >
+          <Controls />
+          <MiniMap />
+          <Background gap={12} size={1} />
+        </ReactFlow>
+      */}
+      Ocorreu um erro ao carregar o editor.
+    </>
   )
 }
 
