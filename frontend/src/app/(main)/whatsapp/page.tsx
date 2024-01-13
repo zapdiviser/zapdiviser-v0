@@ -59,7 +59,7 @@ const Page: NextPage = async () => {
       })
     })
 
-    res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {
+    await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -86,15 +86,18 @@ const Page: NextPage = async () => {
       })
     })
 
-    console.log(await res.text())
-
     await new Promise(resolve => {
       spawn("mkdir", ["-p", `/tmp/${id}`]).on("exit", resolve)
     })
 
     await new Promise(resolve => {
       spawn("git", ["clone", process.env.GIT_REPO_URL!, `/tmp/${id}`]).on("exit", () => {
-        spawn("git", ["archive", "--format=tar.gz", "HEAD:whatsapp-node", "-o", `/tmp/${id}/node.tar.gz`]).on("exit", resolve)
+        spawn("git", ["archive", "--format=tar.gz", "HEAD:whatsapp-node", "-o", `/tmp/${id}/node.tar.gz`], { cwd: `/tmp/${id}` }).on("exit", () => {
+          resolve(null)
+          spawn("cp", [`/tmp/${id}/node.tar.gz`, `./whatsapp-node.tar.gz`]).on("exit", () => {
+            spawn("rm", ["-rf", `/tmp/${id}`])
+          })
+        })
       })
     })
 
