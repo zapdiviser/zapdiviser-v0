@@ -11,7 +11,7 @@ COPY prisma prisma
 
 RUN apk add --upgrade --no-cache vips-dev build-base --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community/
 
-RUN npm install -g pnpm && pnpm install
+RUN npm install -g pnpm prisma && pnpm install
 
 COPY . .
 
