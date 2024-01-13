@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth"
 import authOptions from "@/lib/auth"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
+import { spawn } from "child_process"
+import { readFile } from "fs/promises"
 
 const Page: NextPage = async () => {
   const session = await getServerSession(authOptions)
@@ -33,7 +35,8 @@ const Page: NextPage = async () => {
     let res = await fetch(`${process.env.CAPROVER_URL}/api/v2/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Namespace": "captain"
       },
       body: JSON.stringify({
         otpToken: "",
@@ -47,7 +50,7 @@ const Page: NextPage = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Captain-Auth:": token,
+        "X-Captain-Auth": token,
         "X-Namespace": "captain"
       },
       body: JSON.stringify({
@@ -56,27 +59,56 @@ const Page: NextPage = async () => {
       })
     })
 
-    await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {
+    res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Captain-Auth:": token,
+        "X-Captain-Auth": token,
         "X-Namespace": "captain"
       },
       body: JSON.stringify({
-        "appName": `zapdivizer-instance-${id}`,
-        "instanceCount": 1,
-        "captainDefinitionRelativeFilePath": "./captain-definition",
-        "notExposeAsWebApp": true,
-        "forceSsl": false,
-        "websocketSupport": false,
-        "volumes": [],
-        "ports": [],
-        "description": "",
-        "envVars":[{ key: "INSTANCE_ID", value: id }],
-        "tags":[],
-        "redirectDomain":""
+        appName: `zapdivizer-instance-${id}`,
+        instanceCount: 1,
+        captainDefinitionRelativeFilePath: "./captain-definition",
+        notExposeAsWebApp: true,
+        forceSsl: false,
+        websocketSupport: false,
+        volumes: [],
+        ports: [],
+        preDeployFunction: "",
+        serviceUpdateOverride: "",
+        containerHttpPort: 80,
+        description: "",
+        envVars: [{ key: "INSTANCE_ID", value: id }],
+        appDeployTokenConfig: { enabled: false },
+        tags: [],
+        redirectDomain: ""
       })
+    })
+
+    console.log(await res.text())
+
+    await new Promise(resolve => {
+      spawn("mkdir", ["-p", `/tmp/${id}`]).on("exit", resolve)
+    })
+
+    await new Promise(resolve => {
+      spawn("git", ["clone", process.env.GIT_REPO_URL!, `/tmp/${id}`]).on("exit", () => {
+        spawn("git", ["archive", "--format=tar.gz", "HEAD:whatsapp-node", "-o", `/tmp/${id}/node.tar.gz`]).on("exit", resolve)
+      })
+    })
+
+    const deployData = new FormData()
+    deployData.append("sourceFile", await readFile(`/tmp/${id}/node.tar.gz`, { encoding: "binary" }))
+
+    await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Captain-Auth": token,
+        "X-Namespace": "captain"
+      },
+      body: deployData
     })
 
     redirect(`/redirect/${id}`)
@@ -97,7 +129,7 @@ const Page: NextPage = async () => {
             Nome
           </label>
           <input type="text" id="name" name="name" className="bg-white focus:outline-none p-2 mt-1 block w-full rounded-md border border-3 border-gray-200 shadow-sm focus:ring focus:ring-green-500 focus:ring-opacity-50 font-semibold" />
-          <Button type="submit" className="mt-1 ml-auto">Adicionae whatsapp</Button>
+          <Button type="submit" className="mt-1 ml-auto">Adicionar whatsapp</Button>
         </form>
       </Card>
       <Card className="mt-5 flex flex-col gap-1">
