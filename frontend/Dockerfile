@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20
 
 ENV NPM_CONFIG_LOGLEVEL warn
 ENV NODE_ENV production
@@ -9,10 +9,7 @@ COPY package.json .
 COPY pnpm-lock.yaml .
 COPY prisma prisma
 
-RUN apk add --upgrade --no-cache vips-dev build-base --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community/
-RUN apk add --update git
-
-RUN npm install -g pnpm prisma && NODE_ENV=development pnpm install && pnpm exec prisma generate
+RUN npm install -g pnpm && NODE_ENV=development pnpm install
 
 COPY . .
 
