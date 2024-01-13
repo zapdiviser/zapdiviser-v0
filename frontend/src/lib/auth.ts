@@ -1,10 +1,10 @@
-import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { AuthOptions } from "next-auth"
-import redis from "./redis"
 import CredentialsProvider from "next-auth/providers/credentials"
 import argon2 from "argon2"
+import prisma from "./prisma"
 
-const adapter = UpstashRedisAdapter(redis)
+const adapter = PrismaAdapter(prisma)
 
 const authOptions: AuthOptions = {
   providers: [
@@ -16,17 +16,19 @@ const authOptions: AuthOptions = {
       authorize: async (credentials) => {
         const { email, password } = credentials!
 
-        const user = await adapter.getUserByEmail?.(email)
+        const user = await prisma.user.findUnique({
+          where: {
+            email
+          }
+        })
 
         if (!user) {
           return null
         }
 
-        const userPassword = await redis.get(`user-${user.id}:password`) as string
-
-        //if (!userPassword || !(await argon2.verify(userPassword, password))) {
-        //  return null
-        //}
+        if (!(await argon2.verify(user.password, password))) {
+          return null
+        }
 
         return user
       }
@@ -41,10 +43,18 @@ const authOptions: AuthOptions = {
     signIn: "/login"
   },
   callbacks: {
+    session: async ({ session, token }) => {
+      if (session?.user) {
+        session.user.id = token.sub
+      }
+
+      return session
+    },
     jwt: async ({ user, token }) => {
       if (user) {
         token.uid = user.id
       }
+
       return token
     }
   }

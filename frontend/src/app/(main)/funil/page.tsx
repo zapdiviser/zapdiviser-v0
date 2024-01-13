@@ -1,13 +1,9 @@
 import Button from "@/app/_components/Button"
 import Card from "../../_components/Card"
-import redis from "@/lib/redis"
-import { nanoid } from "nanoid"
 import { redirect } from "next/navigation"
 import { NextPage } from "next"
 import { getServerSession } from "next-auth"
 import authOptions from "@/lib/auth"
-import { FaEdit } from "react-icons/fa"
-import { IoCloseSharp } from "react-icons/io5"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 
@@ -37,7 +33,11 @@ const Page: NextPage = async () => {
     redirect(`/redirect/${id}`)
   }
 
-  const campaigns = await redis.lrange<{ name: string, id: string }>(`user-${user.email}:campaigns`, 0, -1)
+  const funis = await prisma.funil.findMany({
+    where: {
+      userId: user.id!
+    }
+  })
 
   return (
     <>
@@ -53,18 +53,10 @@ const Page: NextPage = async () => {
       </Card>
       <Card className="mt-5 flex flex-col gap-1">
         <span className="text-2xl font-semibold mb-1">Funis criados</span>
-        {campaigns?.map(campaign => (
-          <div key={campaign.id} className="flex w-full p-2 bg-gray-300 rounded items-center">
-            <span className="uppsercase font-semibold">{campaign.name}</span>
-            <div className="justify-self-end ml-auto flex gap-2 items-center">
-              <Link href={`/redirect/${campaign.id}`} className="text-green-700">
-                <FaEdit size={20} />
-              </Link>
-              <Link href={`/redirect/${campaign.id}`} className="text-green-700 -mx-1">
-                <IoCloseSharp size={25} />
-              </Link>
-            </div>
-          </div>
+        {funis.map(funil => (
+          <Link href={`/funil/${funil.id}`} key={funil.id} className="flex w-full p-2 bg-gray-300 rounded items-center">
+            <span className="uppsercase font-semibold">{funil.name}</span>
+          </Link>
         ))}
       </Card>
     </>

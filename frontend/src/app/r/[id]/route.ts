@@ -2,21 +2,28 @@ import redis from "@/lib/redis"
 import { redirect, notFound } from "next/navigation"
 
 export async function GET(req: Request, { params: { id } }: { params: { id: string } }) {
-  const campaign = await redis.json.get(`redirect-${id}`) as { index: number, links: string } | null
+  const result = await redis.multi()
+    .get(`redirect:${id}:index`)
+    .lrange(`redirect:${id}:links`, 0, -1)
+    .exec()
 
-  if (campaign === null) {
+  if (result === null) {
     return notFound()
   }
 
-  const currentUrl = campaign.links[campaign.index]
+  let [[,index], [,links]] = result as unknown as [[any, number], [any, string[]]]
 
-  let nextIndex = campaign.index - 1
+  index = index ?? 0
+
+  const currentUrl = links[index]
+
+  let nextIndex = index - 1
 
   if (nextIndex < 0) {
-    nextIndex = campaign.links.length - 1
+    nextIndex = links.length - 1
   }
 
-  redis.json.set(`redirect-${id}`, "index", nextIndex)
+  redis.set(`redirect:${id}:index`, nextIndex)
 
   redirect(currentUrl)
 }

@@ -5,9 +5,11 @@ import { Resend } from "resend"
 import { nanoid } from "nanoid"
 import CreatedEmail from "@/emails/created"
 import RegularizeEmail from "@/emails/resularize"
+import prisma from "@/lib/prisma"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const adapter = UpstashRedisAdapter(redis)
+const adapter = PrismaAdapter(prisma)
 
 export async function POST(req: Request) {
   const data = await req.json()
@@ -17,20 +19,21 @@ export async function POST(req: Request) {
   }
 
   const email = data.customer.email as string
+  const name = data.customer.name as string
 
   let user = await adapter.getUserByEmail?.(email)
 
   if (!user) {
-    user = await adapter.createUser?.({
-      name: email,
-      email,
-      emailVerified: new Date(),
-      id: email
-    })
-
     const password = nanoid(10)
 
-    await redis.set(`user-${user?.id}:password`, await argon2.hash(password))
+    await prisma.user.create({
+      data: {
+        email,
+        name,
+        emailVerified: new Date(),
+        password: await argon2.hash(password)
+      }
+    })
 
     const { error } = await resend.emails.send({
       to: [email],
@@ -57,7 +60,14 @@ export async function POST(req: Request) {
       active = false
   }
 
-  await redis.set(`user-${user?.id}:active`, active)
+  await prisma.user.update({
+    where: {
+      id: user?.id
+    },
+    data: {
+      isActivated: active
+    }
+  })
 
   if (!active) {
     await resend.emails.send({

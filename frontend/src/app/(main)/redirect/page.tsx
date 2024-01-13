@@ -1,7 +1,6 @@
 import Button from "@/app/_components/Button"
 import Card from "../../_components/Card"
 import redis from "@/lib/redis"
-import { nanoid } from "nanoid"
 import { redirect } from "next/navigation"
 import { NextPage } from "next"
 import { getServerSession } from "next-auth"
@@ -20,9 +19,6 @@ const Page: NextPage = async () => {
   async function create(formData: FormData) {
     "use server"
 
-    const session = await getServerSession(authOptions)
-    const user = session!.user!
-
     const name = formData.get("name") as string
 
     if (!name) {
@@ -36,15 +32,38 @@ const Page: NextPage = async () => {
       }
     })
 
-    await redis.json.set(`redirect:${id}`, "$", {
-      index: 0,
-      links: []
-    })
-
     redirect(`/redirect/${id}`)
   }
 
-  const campaigns = await redis.lrange<{ name: string, id: string }>(`user-${user.email}:campaigns`, 0, -1)
+  async function remove(formData: FormData) {
+    "use server"
+
+    const id = formData.get("id") as string
+
+    if (!id) {
+      return
+    }
+
+    await Promise.all([
+      prisma.redirect.delete({
+        where: {
+          id
+        }
+      }),
+      redis.multi()
+        .del(`redirect:${id}:index`)
+        .del(`redirect:${id}:links`)
+        .exec()
+    ])
+
+    return redirect("/redirect")
+  }
+
+  const campaigns = await prisma.redirect.findMany({
+    where: {
+      userId: user.id!
+    }
+  })
 
   return (
     <>
@@ -70,9 +89,12 @@ const Page: NextPage = async () => {
               <Link href={`/redirect/${campaign.id}`} className="text-green-700">
                 <FaEdit size={20} />
               </Link>
-              <Link href={`/redirect/${campaign.id}`} className="text-green-700 -mx-1">
-                <IoCloseSharp size={25} />
-              </Link>
+              <form action={remove} className="text-green-700 -mx-1">
+                <input type="hidden" name="id" value={campaign.id} />
+                <button type="submit" className="border-0 bg-transparent">
+                  <IoCloseSharp size={25} />
+                </button>
+              </form>
             </div>
           </div>
         ))}

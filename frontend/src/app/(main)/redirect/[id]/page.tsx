@@ -25,14 +25,15 @@ const Page: NextPage<{ params: { id: string } }> = async ({ params: { id } }) =>
 
     const url = new URL(link)
 
-    await prisma.redirectUrl.create({
-      data: {
-        url: url.toString(),
-        redirectId: id
-      }
-    })
-
-    await redis.json.arrappend(`redirect:${id}`, "$.links", url.toString())
+    await Promise.all([
+      prisma.redirectUrl.create({
+        data: {
+          url: url.toString(),
+          redirectId: id
+        }
+      }),
+      redis.lpush(`redirect:${id}:links`, url.toString())
+    ])
 
     return redirect(`/redirect/${id}`)
   }
@@ -46,16 +47,18 @@ const Page: NextPage<{ params: { id: string } }> = async ({ params: { id } }) =>
       return
     }
 
-    await prisma.redirectUrl.deleteMany({
-      where: {
-        redirectId: id,
-        url: link
-      }
-    })
-
-    const index = (await redis.json.arrindex(`redirect:${id}`, "$.links", link))[0]!
-    await redis.json.arrpop(`redirect:${id}`, "$.links", index)
-    await redis.json.set(`redirect:${id}`, "$.index", 0)
+    await Promise.all([
+      prisma.redirectUrl.deleteMany({
+        where: {
+          redirectId: id,
+          url: link
+        }
+      }),
+      redis.multi()
+        .lrem(`redirect:${id}:links`, 0, link)
+        .set(`redirect:${id}:index`, 0)
+        .exec()
+    ])
 
     return redirect(`/redirect/${id}`)
   }
@@ -82,7 +85,6 @@ const Page: NextPage<{ params: { id: string } }> = async ({ params: { id } }) =>
   const url = `${process.env.NEXTAUTH_URL}/r/${id}`
 
   return (
-
     <>
       <h1 className="text-5xl uppercase font-bold">Campanha "{name}"</h1>
       <Card className="mt-5 flex flex-col gap-1">
