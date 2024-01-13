@@ -1,30 +1,35 @@
 import { proto } from "@whiskeysockets/baileys"
 import { AuthenticationCreds, AuthenticationState, SignalDataTypeMap, initAuthCreds, BufferJSON } from "@whiskeysockets/baileys"
-import redis from '../redis'
+import redis from "../redis"
 
-export const useRedisAuthState = async(instanceid: string): Promise<{ state: AuthenticationState, saveCreds: () => Promise<void> }> => {
+export const useRedisAuthState = async(instanceid: string): Promise<{ state: AuthenticationState, saveCreds: () => Promise<void>, clearData: () => Promise<void> }> => {
 	const writeData = async (data: any, id: string) => {
 		await redis.set(`auth:${instanceid}:${id}`, JSON.stringify(data, BufferJSON.replacer))
 	}
 
-	const readData = async(file: string) => {
+	const readData = async(id: string) => {
 		try {
-			const data = await redis.get(`auth:${instanceid}:${file}`)
+			const data = await redis.get(`auth:${instanceid}:${id}`)
 			return JSON.parse(data!, BufferJSON.reviver)
 		} catch(error) {
 			return null
 		}
 	}
 
-	const removeData = async(file: string) => {
+	const removeData = async(id: string) => {
 		try {
-			await redis.del(`auth:${instanceid}:${file}`)
+			await redis.del(`auth:${instanceid}:${id}`)
 		} catch{
 
 		}
 	}
 
-	const creds: AuthenticationCreds = await readData('creds.json') || initAuthCreds()
+  const clearData = async() => {
+    const keys = await redis.keys(`auth:${instanceid}:*`)
+    await redis.del(...keys)
+  }
+
+	const creds: AuthenticationCreds = await readData("creds") || initAuthCreds()
 
 	return {
 		state: {
@@ -35,8 +40,8 @@ export const useRedisAuthState = async(instanceid: string): Promise<{ state: Aut
 					await Promise.all(
 						ids.map(
 							async id => {
-								let value = await readData(`${type}-${id}.json`)
-								if (type === 'app-state-sync-key' && value) {
+								let value = await readData(`${type}-${id}`)
+								if (type === "app-state-sync-key" && value) {
 									value = proto.Message.AppStateSyncKeyData.fromObject(value)
 								}
 
@@ -63,6 +68,7 @@ export const useRedisAuthState = async(instanceid: string): Promise<{ state: Aut
 		},
 		saveCreds: () => {
 			return writeData(creds, "creds")
-		}
+		},
+    clearData
 	}
 }

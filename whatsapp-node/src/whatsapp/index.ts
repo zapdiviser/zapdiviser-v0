@@ -2,6 +2,7 @@ import { Boom } from "@hapi/boom"
 import NodeCache from "node-cache"
 import makeWASocket, {
   AnyMessageContent,
+  Browsers,
   delay,
   DisconnectReason,
   fetchLatestBaileysVersion,
@@ -21,6 +22,7 @@ class Whatsapp {
   logger = MAIN_LOGGER.child({})
   msgRetryCounterCache = new NodeCache()
   emmiter = new EventEmitter()
+  hasStarted = false
 
   constructor(instanceId: string) {
     this.instanceId = instanceId
@@ -29,7 +31,7 @@ class Whatsapp {
   }
 
   async startSock() {
-    const { state, saveCreds } = await useRedisAuthState(this.instanceId)
+    const { state, saveCreds, clearData } = await useRedisAuthState(this.instanceId)
     const { version, isLatest } = await fetchLatestBaileysVersion()
     console.log(`using WA v${version.join(".")}, isLatest: ${isLatest}`)
 
@@ -42,7 +44,7 @@ class Whatsapp {
       },
       msgRetryCounterCache: this.msgRetryCounterCache,
       generateHighQualityLinkPreview: true,
-      getMessage: this.getMessage
+      browser: ["Zapdivizer", "Zapdivizer", "1.0.0"],
     })
 
     this.sock.ev.process(
@@ -56,14 +58,17 @@ class Whatsapp {
           }
 
           if (connection === "close") {
-            if ((lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut) {
+            if ([401, DisconnectReason.loggedOut].includes((lastDisconnect?.error as Boom)?.output?.statusCode)) {
+              await clearData()
               this.startSock()
             } else {
-              console.log("Connection closed. You are logged out.")
+              this.startSock()
             }
+          } else if (connection === "connecting") {
+            this.emmiter.emit("connecting")
+          } else if (connection === "open") {
+            this.emmiter.emit("connected")
           }
-
-          console.log("connection update", update)
         }
 
         if (events["creds.update"]) {
@@ -181,6 +186,14 @@ class Whatsapp {
 
   async onQrCode(cb: (qr: string) => void) {
     this.emmiter.on("qr", cb)
+  }
+
+  async onConnecting(cb: () => void) {
+    this.emmiter.on("connecting", cb)
+  }
+
+  async onConnected(cb: () => void) {
+    this.emmiter.on("connected", cb)
   }
 }
 

@@ -26,11 +26,14 @@ async function main () {
 
   await whatsapp.startSock()
 
+  await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:ready`, {})
+  await redis.set(`whatsapp:${insanceId}:ready`, "true")
+
   const worker = new Worker<Message>(`MessagesSender:${insanceId}`, async job => {
     const { to, content } = job.data
 
     await whatsapp.sendMessageWTyping({ text: content }, to)
-  })
+  }, { connection: redis })
 
   worker.on("completed", job => {
     console.log(`${job.id} has completed!`)
@@ -45,9 +48,15 @@ async function main () {
   })
 
   whatsapp.onQrCode(async qr => {
-    await pusher.trigger(`whatsapp:${insanceId}`, "qr", {
-      message: qr
-    })
+    await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:qr`, qr)
+  })
+
+  whatsapp.onConnecting(async () => {
+    await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:connecting`, {})
+  })
+
+  whatsapp.onConnected(async () => {
+    await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:connected`, {})
   })
 }
 
