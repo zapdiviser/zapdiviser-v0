@@ -59,7 +59,7 @@ const Page: NextPage = async () => {
       })
     })
 
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2500))
 
     await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {
       method: "POST",
@@ -81,7 +81,12 @@ const Page: NextPage = async () => {
         serviceUpdateOverride: "",
         containerHttpPort: 80,
         description: "",
-        envVars: [{ key: "INSTANCE_ID", value: id }],
+        envVars: [
+          { key: "INSTANCE_ID", value: id },
+          { key: "REDIS_HOST", value: process.env.REDIS_HOST },
+          { key: "REDIS_PORT", value: process.env.REDIS_PORT },
+          { key: "REDIS_PASSWORD", value: process.env.REDIS_PASSWORD }
+        ],
         appDeployTokenConfig: { enabled: false },
         tags: [],
         redirectDomain: ""
@@ -95,21 +100,20 @@ const Page: NextPage = async () => {
     })
 
     const deployData = new FormData()
-    deployData.append("sourceFile", new Blob([await readFile(`/tmp/${id}/node.tar`)]), "node.tar")
+    const buffer = await readFile(`/tmp/${id}/node.tar`)
+    const file = new Blob([buffer], { type: "application/x-tar" })
+    deployData.append("sourceFile", file)
 
-    res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
+    await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
       method: "POST",
       headers: {
-        "Content-Type": "multipart/form-data",
         "X-Captain-Auth": token,
         "X-Namespace": "captain"
       },
       body: deployData
     })
 
-    console.log(await res.text())
-
-    redirect(`/redirect/${id}`)
+    redirect(`/whatsapp/${id}`)
   }
 
   const whatsapps = await prisma.instance.findMany({

@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@hapi/boom": "^10.0.1",
-    "@whiskeysockets/baileys": "github:WhiskeySockets/Baileys",
+    "@whiskeysockets/baileys": "^6.5.0",
     "bullmq": "^5.1.1",
     "ioredis": "^5.3.2",
     "node-cache": "^5.1.2",
