@@ -2,7 +2,6 @@ import { Boom } from "@hapi/boom"
 import NodeCache from "node-cache"
 import makeWASocket, {
   AnyMessageContent,
-  Browsers,
   delay,
   DisconnectReason,
   fetchLatestBaileysVersion,
