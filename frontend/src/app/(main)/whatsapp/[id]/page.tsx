@@ -43,7 +43,7 @@ const Page: NextPage<{ params: { id: string } }> = ({ params: { id } }) => {
   return (
     <div>
       <h1 className="text-5xl uppercase font-bold">WhatsApp</h1>
-      {loading ? <span>Estamos subindo uma instância do WhatsApp Web para você. Esse processo geralmente leva cerca de 10 minutos.</span> : <>
+      {loading ? <span>Estamos subindo uma instância do WhatsApp Web para você. Esse processo geralmente leva cerca de 10 minutos. Por favor não feche essa página.</span> : <>
         {!connected && qr && (
           <div className="mt-5">
             <QRCodeSVG value={qr} level="H" size={256} />

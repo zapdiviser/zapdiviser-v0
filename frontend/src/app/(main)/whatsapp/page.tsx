@@ -59,7 +59,59 @@ const Page: NextPage = async () => {
       })
     })
 
-    await new Promise(resolve => setTimeout(resolve, 2500))
+    while (true) {
+      res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
+        headers: {
+          "X-Captain-Auth": token,
+          "X-Namespace": "captain"
+        }
+      })
+
+      const { data: { isAppBuilding } } = await res.json()
+
+      if (!isAppBuilding) {
+        break
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    await new Promise(resolve => {
+      spawn("git", ["clone", process.env.GIT_REPO_URL!, `/tmp/${id}`]).on("exit", () => {
+        spawn("git", ["archive", "--format=tar", "HEAD:whatsapp-node", "-o", `/tmp/${id}/node.tar`], { cwd: `/tmp/${id}` }).on("exit", resolve)
+      })
+    })
+
+    const deployData = new FormData()
+    const buffer = await readFile(`/tmp/${id}/node.tar`)
+    const file = new Blob([buffer], { type: "application/x-tar" })
+    deployData.append("sourceFile", file)
+
+    await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
+      method: "POST",
+      headers: {
+        "X-Captain-Auth": token,
+        "X-Namespace": "captain"
+      },
+      body: deployData
+    })
+
+    while (true) {
+      res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
+        headers: {
+          "X-Captain-Auth": token,
+          "X-Namespace": "captain"
+        }
+      })
+
+      const { data: { isAppBuilding } } = await res.json()
+
+      if (!isAppBuilding) {
+        break
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
 
     await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {
       method: "POST",
@@ -91,26 +143,6 @@ const Page: NextPage = async () => {
         tags: [],
         redirectDomain: ""
       })
-    })
-
-    await new Promise(resolve => {
-      spawn("git", ["clone", process.env.GIT_REPO_URL!, `/tmp/${id}`]).on("exit", () => {
-        spawn("git", ["archive", "--format=tar", "HEAD:whatsapp-node", "-o", `/tmp/${id}/node.tar`], { cwd: `/tmp/${id}` }).on("exit", resolve)
-      })
-    })
-
-    const deployData = new FormData()
-    const buffer = await readFile(`/tmp/${id}/node.tar`)
-    const file = new Blob([buffer], { type: "application/x-tar" })
-    deployData.append("sourceFile", file)
-
-    await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
-      method: "POST",
-      headers: {
-        "X-Captain-Auth": token,
-        "X-Namespace": "captain"
-      },
-      body: deployData
     })
 
     redirect(`/whatsapp/${id}`)
