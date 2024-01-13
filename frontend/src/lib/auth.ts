@@ -57,7 +57,8 @@ const authOptions: AuthOptions = {
 
       return token
     }
-  }
+  },
+  secret: process.env.NEXTAUTH_SECRET
 }
 
 export default authOptions
