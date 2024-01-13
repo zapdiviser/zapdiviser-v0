@@ -59,6 +59,8 @@ const Page: NextPage = async () => {
       })
     })
 
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
     await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {
       method: "POST",
       headers: {
@@ -87,24 +89,15 @@ const Page: NextPage = async () => {
     })
 
     await new Promise(resolve => {
-      spawn("mkdir", ["-p", `/tmp/${id}`]).on("exit", resolve)
-    })
-
-    await new Promise(resolve => {
       spawn("git", ["clone", process.env.GIT_REPO_URL!, `/tmp/${id}`]).on("exit", () => {
-        spawn("git", ["archive", "--format=tar.gz", "HEAD:whatsapp-node", "-o", `/tmp/${id}/node.tar.gz`], { cwd: `/tmp/${id}` }).on("exit", () => {
-          resolve(null)
-          spawn("cp", [`/tmp/${id}/node.tar.gz`, `./whatsapp-node.tar.gz`]).on("exit", () => {
-            spawn("rm", ["-rf", `/tmp/${id}`])
-          })
-        })
+        spawn("git", ["archive", "--format=tar", "HEAD:whatsapp-node", "-o", `/tmp/${id}/node.tar`], { cwd: `/tmp/${id}` }).on("exit", resolve)
       })
     })
 
     const deployData = new FormData()
-    deployData.append("sourceFile", await readFile(`/tmp/${id}/node.tar.gz`, { encoding: "binary" }))
+    deployData.append("sourceFile", await readFile(`/tmp/${id}/node.tar`, { encoding: "binary" }))
 
-    await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
+    res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,6 +106,8 @@ const Page: NextPage = async () => {
       },
       body: deployData
     })
+
+    console.log(await res.text())
 
     redirect(`/redirect/${id}`)
   }

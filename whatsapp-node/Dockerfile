@@ -6,7 +6,6 @@ ENV NODE_ENV production
 WORKDIR /app
 
 COPY package.json .
-COPY pnpm-lock.yaml .
 
 RUN npm install -g pnpm && NODE_ENV=development pnpm install
 
