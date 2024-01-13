@@ -95,12 +95,12 @@ const Page: NextPage = async () => {
     })
 
     const deployData = new FormData()
-    deployData.append("sourceFile", await readFile(`/tmp/${id}/node.tar`, { encoding: "binary" }))
+    deployData.append("sourceFile", new Blob([await readFile(`/tmp/${id}/node.tar`)]), "node.tar")
 
     res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
         "X-Captain-Auth": token,
         "X-Namespace": "captain"
       },
