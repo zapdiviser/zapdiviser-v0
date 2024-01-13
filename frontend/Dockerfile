@@ -10,6 +10,7 @@ COPY pnpm-lock.yaml .
 COPY prisma prisma
 
 RUN apk add --upgrade --no-cache vips-dev build-base --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community/
+RUN apk add --update git
 
 RUN npm install -g pnpm prisma && NODE_ENV=development pnpm install && pnpm exec prisma generate
 
