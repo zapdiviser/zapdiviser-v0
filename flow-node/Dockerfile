@@ -7,7 +7,7 @@ WORKDIR /app
 
 COPY package.json .
 
-RUN npm install -g pnpm && pnpm install
+RUN npm install -g pnpm sucrase && pnpm install
 
 COPY . .
 
