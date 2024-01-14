@@ -11,7 +11,7 @@ RUN npm install -g pnpm sucrase && pnpm install
 
 COPY . .
 
-RUN pnpm run build
+# RUN pnpm run build
 
 EXPOSE 3000
 
