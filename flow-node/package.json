@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.ts"
+    "dev": "nodemon src/index.ts",
+    "build": "sucrase ./src -d ./dist --transforms typescript,imports",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -12,11 +14,11 @@
   "devDependencies": {
     "dotenv": "^16.3.1",
     "nodemon": "^3.0.2",
-    "sucrase": "^3.35.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "bullmq": "^5.1.1",
-    "ioredis": "^5.3.2"
+    "ioredis": "^5.3.2",
+    "sucrase": "^3.35.0"
   }
 }

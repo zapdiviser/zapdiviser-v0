@@ -1,3 +1,3 @@
 export { default } from "next-auth/middleware"
 
-export const config = { matcher: ["/((?!api|static|favicon.ico|login|cadastro).*)"] }
+export const config = { matcher: ["/((?!api|static|favicon.ico|login|cadastro|r|f).*)"] }

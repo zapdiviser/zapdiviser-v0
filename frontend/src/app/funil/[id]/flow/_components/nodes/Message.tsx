@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Handle, Position, NodeProps, Node, useReactFlow } from "reactflow"
 import Modal from "react-modal"
 import Button from "@/app/_components/Button"
+import NodeBase from "./Base"
 
 interface Props {
   message: string
@@ -9,7 +10,7 @@ interface Props {
 
 export type IMessageNode = Node<Props>
 
-const MessageNode: React.FC<NodeProps<Props>> = ({ data, id }) => {
+const MessageNode: React.FC<NodeProps<Props>> = ({ data, selected, id }) => {
   const { setNodes } = useReactFlow()
 
   const [message, setMessage] = useState(data.message)
@@ -39,7 +40,7 @@ const MessageNode: React.FC<NodeProps<Props>> = ({ data, id }) => {
   const [modalIsOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="bg-white rounded p-2 border border-black" style={{ pointerEvents: "all" }}>
+    <NodeBase selected={selected} id={id}>
       <Handle type="target" position={Position.Left} id={`${id}-input`} />
       <h1 className="font-black uppercase text-xs">Enviar mensagem</h1>
       <div className="text-xs max-w-48 text-ellipsis overflow-hidden line-clamp-6 truncate break-all text-wrap" onClick={() => setIsOpen(true)}>
@@ -56,7 +57,7 @@ const MessageNode: React.FC<NodeProps<Props>> = ({ data, id }) => {
         <Button className="mt-3 w-full" onClick={save}>Salvar</Button>
       </Modal>
       <Handle type="source" position={Position.Right} id={`${id}-output`} />
-    </div>
+    </NodeBase>
   )
 }
 
