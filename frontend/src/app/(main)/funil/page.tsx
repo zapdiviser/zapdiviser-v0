@@ -31,7 +31,7 @@ const Page: NextPage = async () => {
       }
     })
 
-    redirect(`/redirect/${id}`)
+    redirect(`/funil/${id}`)
   }
 
   const funis = await prisma.funil.findMany({
@@ -42,18 +42,18 @@ const Page: NextPage = async () => {
 
   return (
     <>
-      <h1 className="text-5xl uppercase font-bold">Seus funis</h1>
+      <h1 className="text-5xl uppercase font-bold">Funil de mensagens - Campanha</h1>
       <Card className="mt-5">
         <form action={create} className="flex flex-col gap-1">
           <label className="text-2xl font-semibold" htmlFor="name">
             Nome
           </label>
           <input type="text" id="name" name="name" className="bg-white focus:outline-none p-2 mt-1 block w-full rounded-md border border-3 border-gray-200 shadow-sm focus:ring focus:ring-green-500 focus:ring-opacity-50 font-semibold" />
-          <Button type="submit" className="mt-1 ml-auto">Criar funil</Button>
+          <Button type="submit" className="mt-1 ml-auto">Criar campanhas</Button>
         </form>
       </Card>
       <Card className="mt-5 flex flex-col gap-1">
-        <span className="text-2xl font-semibold mb-1">Funis criados</span>
+        <span className="text-2xl font-semibold mb-1">Campanhas criadas</span>
         {funis.map(funil => (
           <Link href={`/funil/${funil.id}`} key={funil.id} className="flex w-full p-2 bg-gray-300 rounded items-center">
             <span className="uppsercase font-semibold">{funil.name}</span>

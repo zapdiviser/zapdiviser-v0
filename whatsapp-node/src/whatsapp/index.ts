@@ -163,7 +163,15 @@ class Whatsapp {
     return this.sock
   }
 
-  async sendMessageWTyping(msg: AnyMessageContent, jid: string) {
+  async sendMessageWTyping(msg: AnyMessageContent, phone: string) {
+    const result = await this.sock.onWhatsApp(phone).catch(() => null)
+
+    if (result === null || result.length === 0 || !result[0].jid) {
+      return
+    }
+
+    const jid = result[0].jid
+
     await this.sock.presenceSubscribe(jid)
     await delay(500)
 

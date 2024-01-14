@@ -9,15 +9,69 @@ const redis = new Redis({
   port: parseInt(process.env.REDIS_PORT!)
 })
 
-const worker = new Worker<{ from: string, to: string }>(""FlowTriggers"", async job => {
-  const { from, to } = job.data
+interface WebhookEvent {
+  from: "webhook"
+  event: "cart_updated"
+  data: {
+    funilId: string
+    phone: string
+    name: string
+  }
+}
 
-  const situation = await redis.get(`conversation:${from}:${to}`)
+interface WhatsappEvent {
+  from: "whatsapp"
+  event: "message"
+  data: {
+    instanceId: string
+    userId: string
+    from: string
+    content: string
+  }
+}
 
-  if (situation) {
+const worker = new Worker<WebhookEvent | WhatsappEvent>("Flows", async job => {
+  const { event, from } = job.data
 
-  } else {
+  switch (from) {
+    case "whatsapp":
+      switch (event) {
+        case "message":
+          const { data: { from, content, instanceId, userId } } = job.data as WhatsappEvent
 
+          const situation = await redis.get(`conversation:${from}:${instanceId}`)
+
+          if (situation) {
+
+          } else {
+
+          }
+
+          break
+      }
+
+      break
+
+    case "webhook":
+      switch (event) {
+        case "cart_updated":
+          const { data: { funilId, phone, name } } = job.data as WebhookEvent
+
+          /*
+          const situation = await redis.get(`conversation:${from}:${funilId}`)
+
+          if (situation) {
+
+          } else {
+
+          }*/
+
+          const queue = new Queue(`MessagesSender:${funilId}`, { connection: redis })
+
+          break
+      }
+
+      break
   }
 }, {
   connection: redis

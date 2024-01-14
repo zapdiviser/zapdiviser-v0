@@ -3,7 +3,7 @@ import Whatsapp from "./whatsapp"
 import { Worker, Queue } from "bullmq"
 import Pusher from "pusher"
 
-const insanceId = process.env.INSTANCE_ID!
+const instanceId = process.env.INSTANCE_ID!
 
 const pusher = new Pusher({
   appId: "1740345",
@@ -22,14 +22,14 @@ interface Message {
 async function main () {
   const queue = new Queue("FlowTriggers", { connection: redis })
 
-  const whatsapp = new Whatsapp(insanceId)
+  const whatsapp = new Whatsapp(instanceId)
 
   await whatsapp.startSock()
 
-  await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:ready`, {})
-  await redis.set(`whatsapp:${insanceId}:ready`, "true")
+  await pusher.trigger("goodly-grove-306", `whatsapp:${instanceId}:ready`, {})
+  await redis.set(`whatsapp:${instanceId}:ready`, "true")
 
-  const worker = new Worker<Message>(`MessagesSender:${insanceId}`, async job => {
+  const worker = new Worker<Message>(`MessagesSender:${instanceId}`, async job => {
     const { to, content } = job.data
 
     await whatsapp.sendMessageWTyping({ text: content }, to)
@@ -44,19 +44,19 @@ async function main () {
   })
 
   whatsapp.onNewMessage(async msg => {
-    await queue.add(`message:${insanceId}`, { from: msg.key.remoteJid, content: msg.message?.conversation! })
+    await queue.add("Flows", { event: "message", instanceId, from: msg.key.remoteJid, content: msg.message?.conversation! })
   })
 
   whatsapp.onQrCode(async qr => {
-    await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:qr`, qr)
+    await pusher.trigger("goodly-grove-306", `whatsapp:${instanceId}:qr`, qr)
   })
 
   whatsapp.onConnecting(async () => {
-    await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:connecting`, {})
+    await pusher.trigger("goodly-grove-306", `whatsapp:${instanceId}:connecting`, {})
   })
 
   whatsapp.onConnected(async () => {
-    await pusher.trigger("goodly-grove-306", `whatsapp:${insanceId}:connected`, {})
+    await pusher.trigger("goodly-grove-306", `whatsapp:${instanceId}:connected`, {})
   })
 }
 
