@@ -7,11 +7,11 @@ WORKDIR /app
 
 COPY package.json .
 
-RUN npm install -g pnpm sucrase && pnpm install
+RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
-# RUN pnpm run build
+RUN pnpm run build
 
 EXPOSE 3000
 
