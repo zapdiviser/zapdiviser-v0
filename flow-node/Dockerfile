@@ -3,16 +3,16 @@ FROM node:20-alpine
 ENV NPM_CONFIG_LOGLEVEL warn
 ENV NODE_ENV production
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY package.json .
+COPY package.json ./
 
-RUN npm install -g pnpm && NODE_ENV=development pnpm install
+RUN npm install && npm i -g sucrase
 
-COPY ./src .
+COPY . .
 
-RUN pnpm run build
+RUN npm run build
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["npm", "run", "start"]
