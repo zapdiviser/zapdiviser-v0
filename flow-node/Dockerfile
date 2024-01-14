@@ -9,7 +9,7 @@ COPY package.json .
 
 RUN npm install -g pnpm && NODE_ENV=development pnpm install
 
-COPY . .
+COPY ./src .
 
 RUN pnpm run build
 
