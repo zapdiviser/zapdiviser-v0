@@ -1,18 +1,18 @@
-FROM node:21-alpine
+FROM node:20-alpine
 
 ENV NPM_CONFIG_LOGLEVEL warn
 ENV NODE_ENV production
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package.json ./
 
-RUN npm install && npm i -g sucrase
+RUN npm install -g pnpm sucrase && pnpm i
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]
