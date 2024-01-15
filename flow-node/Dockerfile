@@ -8,6 +8,6 @@ RUN npm install -g pnpm sucrase && pnpm i
 
 COPY . .
 
-RUN npx sucrase ./src -d ./dist --transforms typescript,imports
+RUN pnpm build
 
 CMD ["pnpm", "start"]
