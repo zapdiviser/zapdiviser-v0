@@ -60,6 +60,8 @@ const Page: NextPage = async () => {
     })
 
     while (true) {
+      await new Promise(resolve => setTimeout(resolve, 500))
+
       res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
         headers: {
           "X-Captain-Auth": token,
@@ -72,8 +74,6 @@ const Page: NextPage = async () => {
       if (!isAppBuilding) {
         break
       }
-
-      await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
     await new Promise(resolve => {
@@ -97,6 +97,8 @@ const Page: NextPage = async () => {
     })
 
     while (true) {
+      await new Promise(resolve => setTimeout(resolve, 500))
+
       res = await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appData/zapdivizer-instance-${id}?detached=1`, {
         headers: {
           "X-Captain-Auth": token,
@@ -109,8 +111,6 @@ const Page: NextPage = async () => {
       if (!isAppBuilding) {
         break
       }
-
-      await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
     await fetch(`${process.env.CAPROVER_URL}/api/v2/user/apps/appDefinitions/update`, {

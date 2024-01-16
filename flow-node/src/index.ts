@@ -42,7 +42,6 @@ interface WhatsappEvent {
 
 const worker = new Worker<FlowEvent | WebhookEvent | WhatsappEvent>("FlowTriggers", async job => {
   const { event, from } = job.data
-  console.log(job.data)
 
   switch (from) {
     case "whatsapp":
